@@ -1,0 +1,21 @@
+<!-- edit.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit PDF</title>
+</head>
+<body>
+    <h1>Edit PDF: {{.Filename}}</h1>
+    
+    <!-- Display the PDF content using an embed tag -->
+    <embed src="data:application/pdf;base64,{{.PdfBase64}}" type="application/pdf" width="100%" height="600px" />
+    
+    <!-- Add form elements for editing PDF content, adding text, and uploading signature -->
+    <form action="/save/{{.Filename}}" method="post">
+        <!-- Add form elements as needed -->
+        <button type="submit">Save and Download</button>
+    </form>
+</body>
+</html>
