@@ -20,7 +20,7 @@ Very basic, once the program runs, you can :
 
 ```bash
 # get the code
-git clone ... miniPDFeditor
+git clone https://github.com/SimonTrux/miniPDFeditor.git miniPDFeditor
 cd miniPDFeditor
 
 # compile it

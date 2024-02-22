@@ -1,4 +1,4 @@
-module yourpdfeditor
+module miniPDFeditor
 
 go 1.17
 
