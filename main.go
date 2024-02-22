@@ -1,13 +1,13 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"os"
-	"io"
 	"path/filepath"
-	"encoding/base64"
 
 	"github.com/gorilla/mux"
 	"github.com/signintech/gopdf"
@@ -82,7 +82,6 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-
 func saveHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	filename := vars["filename"]
@@ -95,18 +94,12 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	text := r.Form.Get("text")
-	signatureImage, _, err := r.FormFile("signature")
-	if err != nil {
-		http.Error(w, "Error retrieving signature image", http.StatusInternalServerError)
-		return
-	}
-	defer signatureImage.Close()
 
 	// Apply changes to the PDF using gopdf package
 	pdf := gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
 	pdf.AddPage()
-	pdf.Text(text)  // Adjust the coordinates as needed
+	pdf.Text(text) // Adjust the coordinates as needed
 	// Add signature image logic here
 
 	// Save the modified PDF
