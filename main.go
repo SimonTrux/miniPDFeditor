@@ -21,6 +21,7 @@ func main() {
 	r.HandleFunc("/upload", uploadHandler).Methods("POST")
 	r.HandleFunc("/edit/{filename}", editHandler).Methods("GET")
 	r.HandleFunc("/save/{filename}", saveHandler).Methods("POST")
+	r.HandleFunc("/download/{filename}", downloadHandler).Methods("GET")
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	http.Handle("/", r)
@@ -30,7 +31,7 @@ func main() {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "index.html", nil)
+	templates.ExecuteTemplate(w, "page1.html", nil)
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +101,6 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
 	pdf.AddPage()
 	pdf.Text(text) // Adjust the coordinates as needed
-	// Add signature image logic here
 
 	// Save the modified PDF
 	outputFilename := filepath.Join("output", filename)
@@ -111,90 +111,16 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Provide download link for the modified PDF
-	http.ServeFile(w, r, outputFilename)
+	downloadLink := "/download/" + filename
+	http.Redirect(w, r, downloadLink, http.StatusSeeOther)
 }
 
-//
-//// saveHandler function
-//func saveHandler(w http.ResponseWriter, r *http.Request) {
-//	vars := mux.Vars(r)
-//	filename := vars["filename"]
-//
-//	// Retrieve form data (text, signature image, etc.)
-//	err := r.ParseMultipartForm(10 << 20) // Set max memory to 10 MB for the entire form
-//	if err != nil {
-//		http.Error(w, "Error parsing form", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	text := r.FormValue("text")
-//	signatureImage, _, err := r.FormFile("signature")
-//	if err != nil {
-//		http.Error(w, "Error retrieving signature image", http.StatusInternalServerError)
-//		return
-//	}
-//	defer signatureImage.Close()
-//
-//	// Read the existing PDF content
-//	pdfPath := filepath.Join("uploads", filename)
-//	pdfContent, err := os.ReadFile(pdfPath)
-//	if err != nil {
-//		http.Error(w, "Error reading existing PDF file", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	// Create a new PDF instance and load the existing content
-//	pdf := gopdf.GoPdf{}
-//	err = pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
-//	if err != nil {
-//		http.Error(w, "Error initializing PDF", http.StatusInternalServerError)
-//		return
-//	}
-//	err = pdf.AddPage()
-//	if err != nil {
-//		http.Error(w, "Error adding page to PDF", http.StatusInternalServerError)
-//		return
-//	}
-//	err = pdf.AddTTFFont("Arial", "assets/fonts/arial.ttf")
-//	if err != nil {
-//		http.Error(w, "Error adding font to PDF", http.StatusInternalServerError)
-//		return
-//	}
-//	err = pdf.SetFont("Arial", "", 14)
-//	if err != nil {
-//		http.Error(w, "Error setting font in PDF", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	// Write the existing content to the new PDF
-//	err = pdf.WritePdfStream(pdfContent)
-//	if err != nil {
-//		http.Error(w, "Error adding existing content to PDF", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	// Add text to the PDF
-//	err = pdf.SetXY(50, 50)
-//	if err != nil {
-//		http.Error(w, "Error setting X coordinate in PDF", http.StatusInternalServerError)
-//		return
-//	}
-//	err = pdf.Cell(nil, text)
-//	if err != nil {
-//		http.Error(w, "Error adding text to PDF", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	// Add logic to handle the signature image here
-//
-//	// Save the modified PDF
-//	outputFilename := filepath.Join("output", filename)
-//	err = pdf.WritePdf(outputFilename)
-//	if err != nil {
-//		http.Error(w, "Error saving PDF", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	// Provide download link for the modified PDF
-//	http.ServeFile(w, r, outputFilename)
-//}
+// Add a new handler for serving the download link
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	filename := vars["filename"]
+
+	// Provide download link for the modified PDF
+	outputFilename := filepath.Join("output", filename)
+	http.ServeFile(w, r, outputFilename)
+}
